@@ -131,8 +131,8 @@ class SqlTest extends GroovyTestCase {
             if (res)
                 res.close()
         }
-        res = sub.rows('select * from PERSON') { metaData ->
-            assert sub.connection && !sub.connection.isClosed()
+        sub.rows('select * from PERSON') { metaData ->
+            assert sub.savedConnection && !sub.savedConnection.isClosed()
             data = (1..metaData.columnCount).collect {
                 metaData.getColumnName(it).toLowerCase()
             }
@@ -168,7 +168,7 @@ class SqlTest extends GroovyTestCase {
 }
 
 class SqlSubclass extends Sql {
-    def connection
+    def savedConnection
 
     SqlSubclass(Sql base) {
         super(base)
@@ -181,6 +181,6 @@ class SqlSubclass extends Sql {
 
     @Override
     void setInternalConnection(Connection conn) {
-        connection = conn
+        savedConnection = conn
     }
 }
