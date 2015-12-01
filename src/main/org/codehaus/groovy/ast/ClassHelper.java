@@ -18,11 +18,13 @@ package org.codehaus.groovy.ast;
 
 import groovy.lang.*;
 import org.codehaus.groovy.runtime.GeneratedClosure;
+import org.codehaus.groovy.runtime.MetaClassHelper;
 import org.codehaus.groovy.vmplugin.VMPluginFactory;
 import org.objectweb.asm.Opcodes;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -222,7 +224,7 @@ public class ClassHelper {
         }        
         return makeWithoutCaching(name);
     }
-    
+
     /**
      * Creates a ClassNode containing the wrapper of a ClassNode 
      * of primitive type. Any ClassNode representing a primitive

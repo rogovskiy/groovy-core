@@ -143,4 +143,20 @@ class LazyTransformTest extends GroovyShellTestCase {
         assertTrue res.@'$list' instanceof SoftReference
         assertEquals([1,2,3], res.list)
     }
+
+  void testJdk7NPE() {
+    def res = evaluate("""
+class Test {
+
+  @Lazy(soft=true)
+  int age = {
+    3
+  }()
+
+}
+
+ new Test().age
+""")
+    assertEquals 3, res
+  }
 }

@@ -37,7 +37,6 @@ import java.util.Arrays;
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 public class LazyASTTransformation implements ASTTransformation, Opcodes {
 
-    private static final ClassNode SOFT_REF = ClassHelper.make(SoftReference.class);
     private static final Expression NULL_EXPR = ConstantExpression.NULL;
     private static final ClassNode OBJECT_TYPE = new ClassNode(Object.class);
     private static final Token ASSIGN = Token.newSymbol("=", -1, -1);
@@ -132,7 +131,10 @@ public class LazyASTTransformation implements ASTTransformation, Opcodes {
 
     private void createSoft(FieldNode fieldNode, Expression initExpr) {
         final ClassNode type = fieldNode.getType();
-        fieldNode.setType(SOFT_REF);
+        ClassNode softRef = ClassHelper.make(SoftReference.class);
+        ClassNode genericType = ClassHelper.getWrapper(fieldNode.getOriginType());
+        softRef.setGenericsTypes(new GenericsType[] { new GenericsType(genericType)} );
+        fieldNode.setType(softRef);
         createSoftGetter(fieldNode, initExpr, type);
         createSoftSetter(fieldNode, type);
     }
@@ -147,7 +149,7 @@ public class LazyASTTransformation implements ASTTransformation, Opcodes {
 
         final BlockStatement elseBlock = new BlockStatement();
         elseBlock.addStatement(new ExpressionStatement(new BinaryExpression(resExpr, ASSIGN, initExpr)));
-        elseBlock.addStatement(new ExpressionStatement(new BinaryExpression(fieldExpr, ASSIGN, new ConstructorCallExpression(SOFT_REF, resExpr))));
+        elseBlock.addStatement(new ExpressionStatement(new BinaryExpression(fieldExpr, ASSIGN, new ConstructorCallExpression(fieldNode.getType(), resExpr))));
         elseBlock.addStatement(new ExpressionStatement(resExpr));
 
         final Statement mainIf = new IfStatement(
@@ -176,7 +178,7 @@ public class LazyASTTransformation implements ASTTransformation, Opcodes {
         final Expression paramExpr = new VariableExpression(parameter);
         body.addStatement(new IfStatement(
                 new BooleanExpression(new BinaryExpression(paramExpr, COMPARE_NOT_EQUAL, NULL_EXPR)),
-                new ExpressionStatement(new BinaryExpression(fieldExpr, ASSIGN, new ConstructorCallExpression(SOFT_REF, paramExpr))),
+                new ExpressionStatement(new BinaryExpression(fieldExpr, ASSIGN, new ConstructorCallExpression(fieldNode.getType(), paramExpr))),
                 new ExpressionStatement(new BinaryExpression(fieldExpr, ASSIGN, NULL_EXPR))
         ));
         int visibility = ACC_PUBLIC;
