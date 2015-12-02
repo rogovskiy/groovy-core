@@ -566,6 +566,7 @@ public class AsmClassGenerator extends ClassGenerator {
         String methodType = BytecodeHelper.getMethodDescriptor(node.getReturnType(), parameters);
 
         String signature = BytecodeHelper.getGenericsMethodSignature(node);
+
         int modifiers = node.getModifiers();
         if (isVargs(node.getParameters())) modifiers |= Opcodes.ACC_VARARGS;
         mv = cv.visitMethod(modifiers, node.getName(), methodType, signature, buildExceptions(node.getExceptions()));
@@ -3753,14 +3754,14 @@ public class AsmClassGenerator extends ClassGenerator {
 
                 // let's add a getter & setter
                 Expression fieldExp = new FieldExpression(paramField);
-                answer.addMethod(
+                MethodNode getter = answer.addMethod(
                         "get" + methodName,
                         ACC_PUBLIC,
                         realType,
                         Parameter.EMPTY_ARRAY,
                         ClassNode.EMPTY_ARRAY,
                         new ReturnStatement(fieldExp));
-
+                getter.setGenericsTypes(realType.getGenericsTypes());
                 /*
                 answer.addMethod(
                     "set" + methodName,

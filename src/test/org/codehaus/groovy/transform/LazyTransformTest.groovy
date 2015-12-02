@@ -159,4 +159,28 @@ class Test {
 """)
     assertEquals 3, res
   }
+
+  void testJdk7GenericClosure() {
+    try {
+      ExpandoMetaClass.enableGlobally()
+      def res = evaluate("""
+  class Test {
+
+    def <T extends Number> T decorate(T arg) {
+      String name
+      T another = arg
+      [1,2,3].each {
+        another = arg  + 1
+      }
+      return another
+    }
+
+  }
+  new Test().decorate(1.00)
+  """)
+      assertEquals 2, res
+    } finally {
+      ExpandoMetaClass.disableGlobally()
+    }
+  }
 }
